@@ -107,7 +107,7 @@ end;
 
 (* Too simple but works for now... *)
 fun build_module_rel_init module_rel init decls =
- prove(“^module_rel ^init (SND (run_decls fbits ^decls []))”, EVAL_TAC \\ simp []);
+	prove(“^module_rel ^init (SND (run_decls fbits ^decls []))”, EVAL_TAC \\ simp []);
 
 (* Expected input format: name = mk_cirucit (procs seqs) (procs combs) init *)
 fun module2hardware module_def outputs comms = let
