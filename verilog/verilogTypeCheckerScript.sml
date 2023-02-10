@@ -133,7 +133,9 @@ Definition infer_exp_def:
   e2_t_len <- array_type_length e2_t;
   sum_check (e1_t_len = e2_t_len) (TypeErrorMsg "infer_exp: Array eq. operands different lengths");
   return (Cmp e1 ArrayEqual e2, VBool_t)
- od) /\
+  od) /\
+
+ (*TODO: Make Resize var ZeroExtend size pass typechecking *)
 
  (infer_exp extenv env _ = INL $ TypeErrorMsg "infer_exp: Non-supported operator")
 End

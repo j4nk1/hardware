@@ -285,17 +285,29 @@ fun hol2hardware_exp (tstate:tstate) s s' tm =
   ret
   end
 
-  else if is_word_concat tm then let
-      val (tml, tmr) = dest_word_concat tm
-      val evall = hol2hardware_exp s tml
-      val evalr = hol2hardware_exp s tmr
-      val result = MATCH_MP Eval_word_concat (CONJ evall evalr)
-      (* TODO: Could add length check here ... *)
-      val gammasum = Arbnum.+ (tml |> size_of, tmr |> size_of) |> mk_numeric_type
-      val result = INST_TYPE [ gamma |-> gammasum ] result
-      val result = EVAL_MP result
+  (* else if is_word_concat tm then let *)
+  (*     val (tml, tmr) = dest_word_concat tm *)
+  (*     val evall = hol2hardware_exp s tml *)
+  (*     val evalr = hol2hardware_exp s tmr *)
+  (*     val result = MATCH_MP Eval_word_concat (CONJ evall evalr) *)
+  (*     (* TODO: Could add length check here ... *) *)
+  (*     val gammasum = Arbnum.+ (tml |> size_of, tmr |> size_of) |> mk_numeric_type *)
+  (*     val result = INST_TYPE [ gamma |-> gammasum ] result *)
+  (*     val result = EVAL_MP result *)
+  (* in *)
+  (*     check_inv_Eval "word_concat" tm result *)
+									 (* end *)
+
+									 (* CASE: zero extend? *)
+  else if is_w2w tm then let
+      val (arg, out_dim) = dest_w2w tm
+      (*val in_dim = dim_of arg
+    val precond = mk_less (mk_dimindex in_dim, mk_dimindex out_dim) |> EVAL_PROVE*)
+      val arg' = hol2hardware_exp tstate s s' arg
+      val result = MATCH_MP Eval_exp_w2w arg'
+      val result = INST_TYPE [ beta |-> out_dim ] result
   in
-      check_inv_Eval "word_concat" tm result
+      ((CONV_RULE o RAND_CONV o RAND_CONV) SIZES_CONV) result
   end
 
  (* Other compound expression, must be state projection *)

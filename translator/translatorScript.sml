@@ -400,6 +400,78 @@ Proof
  fs [fixwidth_def, zero_extend_def, PAD_LEFT] \\ metis_tac [Eval_word_extract_help]
 QED
 
+(* val Eval_w2w = Q.store_thm("Eval_w2w", *)
+(*                            `!s (w:'a word) e. *)
+(*                              Eval fext s env (WORD w) e ==> *)
+(*                            Eval fext s env (WORD ((w2w w):'b word)) (Resize e ZeroExtend (dimindex (:'b)))`, *)
+(*                                 Eval_resize_tac); *)
+
+(* val MAP_PAD_LEFT = Q.store_thm("MAP_PAD_LEFT", *)
+(*                                `!f x n l. MAP f (PAD_LEFT x n l) = PAD_LEFT (f x) n (MAP f l)`, *)
+(*                                                                             rw [PAD_LEFT, MAP_GENLIST]); *)
+
+Theorem MAP_PAD_LEFT:
+  ∀f x n l. MAP f (PAD_LEFT x n l) = PAD_LEFT (f x) n (MAP f l)
+Proof
+  rw [PAD_LEFT, MAP_GENLIST]
+QED
+                                   
+val Eval_resize_tac =
+rw [BOOL_def, WORD_def, Eval_exp_def, erun_def, erun_resize_def] \\
+first_x_assum drule \\ strip_tac \\
+rw [sum_bind_def, sum_map_def, get_VArray_data_def, ver_to_VArray_def, isVBool_def,
+    w2ver_def, (*EVERY_isVBool_MAP_VBool,*)
+    w2v_not_empty, w2v_w2w, w2v_v2w,
+    fixwidth_def, zero_extend_def, MAP_PAD_LEFT, MAP_DROP];
+                                   
+Theorem Eval_exp_w2w:
+  ∀ fext_rel rel s s' (w:'a word) varexp.
+    Eval_exp fext_rel rel fext s s' env (WORD w) varexp ==>
+    Eval_exp fext_rel rel fext s s' env (WORD ((w2w w):'b word)) (Resize varexp ZeroExtend (dimindex (:'b)))
+Proof
+  Eval_resize_tac
+QED
+    
+(* val Eval_word_concat = Q.store_thm("Eval_word_concat", *)
+(*  `!s (lw:'a word) (rw:'b word) lexp rexp. *)
+(*    Eval fext s env (WORD lw) lexp /\ *)
+(*    Eval fext s env (WORD rw) rexp ==> *)
+(*    FINITE (UNIV:'a set) /\ *)
+(*    FINITE (UNIV:'b set) /\ *)
+(*    dimindex (:'c) = dimindex (:'a) + dimindex (:'b) ==> *)
+(*    Eval fext s env (WORD ((lw @@ rw):'c word)) (ArrayConcat lexp rexp)`, *)
+(*  rw [Eval_def] \\ rpt drule_first \\ simp [erun_def, sum_bind_def] \\ *)
+(*  Cases_on `res` >- fs [WORD_def, w2ver_def] \\ *)
+(*  drule_strip WORD_get_VArray_data \\ *)
+(*  Cases_on `res'` >- fs [WORD_def, w2ver_def] \\ *)
+(*  drule_strip WORD_get_VArray_data \\ *)
+(*  simp [sum_bind_def, sum_for_def, sum_map_def, word_concat_def] \\ *)
+
+(*  Cases_on_v2w `lw` \\ Cases_on_v2w `rw` \\ *)
+(*  simp [word_join_v2w, w2w_v2w, index_sum] \\ *)
+(*  fs [WORD_def, w2ver_def, w2v_v2w]); *)
+    
+(* Theorem Eval_exp_word_concat: *)
+(*   ∀s fext_rel rel s s' (lw:'a word) (rw:'b word) lexp rexp varexp. *)
+(*   Eval_exp fext_rel rel fext s s' env (WORD lw) lexp ∧ *)
+(*   Eval_exp fext_rel rel fext s s' env (WORD rw) rexp ⇒ *)
+(*   FINITE (UNIV:'a set) ∧ *)
+(*   FINITE (UNIV:'b set) ∧ *)
+(*   dimindex (:'c) = dimindex (:'a) + dimindex (:'b) ⇒ *)
+(*   Eval_exp fext_rel rel fext s s' env (WORD ((lw @@ rw):'c word)) (ArrayConcat lexp rexp) *)
+(* Proof *)
+(*   rw [Eval_exp_def] \\ rpt drule_first \\ simp [erun_def, sum_bind_def] \\ *)
+(*   Cases_on `res` >- fs [WORD_def, w2ver_def] \\ *)
+(*   drule_strip WORD_get_VArray_data \\ *)
+(*   Cases_on `res'` >- fs [WORD_def, w2ver_def] \\ *)
+(*   drule_strip WORD_get_VArray_data \\ *)
+(*   simp [sum_bind_def, sum_for_def, sum_map_def, word_concat_def] \\ *)
+(*   Cases_on_v2w `lw` \\ Cases_on_v2w `rw` \\ *)
+(*   (* simp [word_join_v2w, w2w_v2w] \\ *) *)
+(*   fs [WORD_def, w2ver_def, w2v_v2w] *)
+(* QED *)
+    
+
 (** Statements **)
 
 Definition Eval_def:
