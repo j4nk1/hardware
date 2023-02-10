@@ -136,7 +136,13 @@ Definition infer_exp_def:
   od) /\
 
  (*TODO: Make Resize var ZeroExtend size pass typechecking *)
-
+ (infer_exp extenv env (Resize a ZeroExtend s) = do
+    (a, a_t) <- infer_exp extenv env a;
+    a_len <- array_type_length a_t;
+    (* (s, s_t) <- infer_exp extenv env s; *)
+    return (Resize a ZeroExtend s, VArray_t (s))
+  od) ∧
+    
  (infer_exp extenv env _ = INL $ TypeErrorMsg "infer_exp: Non-supported operator")
 End
 
