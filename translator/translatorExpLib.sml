@@ -283,7 +283,20 @@ fun hol2hardware_exp (tstate:tstate) s s' tm =
   val ret = MP ret precond
  in
   ret
- end
+  end
+
+  else if is_word_concat tm then let
+      val (tml, tmr) = dest_word_concat tm
+      val evall = hol2hardware_exp s tml
+      val evalr = hol2hardware_exp s tmr
+      val result = MATCH_MP Eval_word_concat (CONJ evall evalr)
+      (* TODO: Could add length check here ... *)
+      val gammasum = Arbnum.+ (tml |> size_of, tmr |> size_of) |> mk_numeric_type
+      val result = INST_TYPE [ gamma |-> gammasum ] result
+      val result = EVAL_MP result
+  in
+      check_inv_Eval "word_concat" tm result
+  end
 
  (* Other compound expression, must be state projection *)
  else if is_comb tm then let
@@ -313,18 +326,6 @@ fun hol2hardware_exp (tstate:tstate) s s' tm =
     val preconds = map (hol2hardware_exp s) [cond, lbranch, rbranch]
   in
     MATCH_MP Eval_InlineIf (LIST_CONJ preconds)
-  end
-
-  (* CASE: word_extract *)
-  else if is_word_extract tm then let
-    val (high, low, arg, size) = dest_word_extract tm
-    val precond = hol2hardware_exp s arg
-    val ret = MATCH_MP Eval_word_extract precond
-    val ret = ret |> ISPECL [high, low] |> INST_TYPE [ beta |-> size ]
-    val precond = ret |> concl |> dest_imp |> fst |> EVAL_PROVE
-    val ret = MP ret precond
-  in
-    ret
   end
 
   (* CASE: zero extend? *)
